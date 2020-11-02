@@ -2,31 +2,13 @@ import json
 import csv
 import uuid
 import re
-from markdown import Markdown
-from io import StringIO
 
 
-# From https://stackoverflow.com/questions/761824/python-how-to-convert-markdown-formatted-text-to-text
-def unmark_element(element, stream=None):
-    if stream is None:
-        stream = StringIO()
-    if element.text:
-        stream.write(element.text)
-    for sub in element:
-        unmark_element(sub, stream)
-    if element.tail:
-        stream.write(element.tail)
-    return stream.getvalue()
-
-
-# patching Markdown
-Markdown.output_formats["plain"] = unmark_element
-__md = Markdown(output_format="plain")
-__md.stripTopLevelTags = False
-
-
-def unmark(text):
-    return __md.convert(text)
+# From https://stackoverflow.com/questions/9662346/python-code-to-remove-html-tags-from-a-string
+def cleanhtml(raw_html):
+    cleanr = re.compile('<.*?>')
+    cleantext = re.sub(cleanr, '', raw_html)
+    return cleantext
 
 
 class UuidCollector:
@@ -71,7 +53,7 @@ cardcsv = open('cards.csv')
 reader = csv.reader(cardcsv)
 for row in reader:
     card = row[0]
-    filebase = row[1]
+    filebase = row[1].lower().replace(" ", "-")
 
     # Get content specific json file to read from
     filename = "json/" + filebase + ".json"
@@ -79,7 +61,7 @@ for row in reader:
     data = json.load(file)
 
     # Get type of content
-    ftype = data["Metadata"]["Type"]
+    ftype = data["metadata"]["type"]
     ftype = ftype.lower().replace(" ", "") # account for different spellings of "funfact"
     ftype_raw = ftype  # the raw type distinguishes between puzzle and counting
     if ftype == "counting":
@@ -88,7 +70,7 @@ for row in reader:
 
     # Get type specific flow template
     flow_fname = "template_" + ftype + ".json"
-    if ftype == "puzzle" and "Extension 2 " not in data:
+    if ftype == "puzzle" and "extension_2" not in data:
         flow_fname = "template_puzzle_1extension.json" # puzzles have two extensions by default, but can have one
     flow_template = open(flow_fname, "r").read()
     # Replace title and all UUIDs
@@ -106,7 +88,7 @@ for row in reader:
         try:
             # Find the subsection of interest
             for s in sections:
-                current_section = current_section[s]
+                current_section = current_section[s.strip().lower().replace(" ", "_")]
         except KeyError:
             if ftype != "puzzle" and sections[0] != "Extension 2 ":
                 # It's ok for puzzles not to have a second extension
@@ -116,11 +98,11 @@ for row in reader:
             # References is a list of refs rather than a string
             if type(current_section) == list:
                 current_section = ''.join(current_section)
-            if sections[0] != "Extension 2 ":
-                if len(current_section) == 0:
-                    print("Warning: blank answer in Section " + repl + " of " + filebase)
-                elif current_section[0] == '[':
-                    print("Warning: template answer in Section " + repl + " of " + filebase)
+            # if sections[0] != "Extension 2 ":
+            if len(current_section) == 0:
+                print("Warning: blank answer in Section " + repl + " of " + filebase)
+            elif cleanhtml(current_section)[0] == '[':
+                print("Warning: template answer in Section " + repl + " of " + filebase)
             # Put content of section into the replacement dict.
             replacement_dict[repl] = current_section
 
@@ -129,7 +111,7 @@ for row in reader:
     new_flow = json.loads(flow_template)
     if ftype == "puzzle":
         # For puzzles: We determine whether the puzzle is an NRICH puzzle.
-        references = ''.join(data["Additional information"]["References"])
+        references = ''.join(data["additional_information"]["references"])
         # The references node should be the first node in the flow.
         assert new_flow["nodes"][0]["actions"][0]["text"] == "Additional information - References"
         if references.lower().find("nrich") != -1:
@@ -160,14 +142,15 @@ for row in reader:
             text = action["text"]
             for k,v in replacement_dict.items():
                 if text == k:
-                    images = re.findall(r"!\[\]\([^\)]*\)", v)
+                    images = re.findall(r'<img.*?>', v)
                     for image in images:
+                        image_filename = re.search(r'src=\".*?\"', image).group()[12:-1]
                         # print(image[4:-1])
-                        action["attachments"].append("@{{fields.image_path & \"{}\"}}".format(image[4:-1]))
-                    v_stripped = re.sub("!\[\]\([^\)]*\)", "", v).strip()  # strip image tags and trailing whitespace
+                        action["attachments"].append("@{{fields.image_path & \"{}\"}}".format(image_filename))
+                    v_stripped = re.sub(r'<img.*?>', "", v).strip()  # strip image tags and trailing whitespace
                     # We also strip Markdown formatting and replace linebreaks with \n,
                     # because RapidPro doesn't support Markdown and JSON doesn't allow linebreaks.
-                    v_stripped = unmark(v_stripped).replace("\n\n", "\\n").replace("\n", "\\n")
+                    v_stripped = cleanhtml(v_stripped).replace("\n\n", "\\n").replace("\n", "\\n")
                     action["text"] = v_stripped
 
     # Add this flow to the template_container.

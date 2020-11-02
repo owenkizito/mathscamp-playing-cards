@@ -53,11 +53,11 @@ Fill in `cards.csv` with the up-to-date mapping of cards to content.
 
 `make_cards.py` creates a `cards.js` file for use with the card template from
 https://github.com/IDEMSInternational/vmc-cards. However, it currently
-contains Markdown which is not supported by the template.
+contains HTML which is not supported by the template.
 
 `make_flows.py` creates `generated_flows.json` with RapidPro flows
 for the chatbot. Still needs testing. It also prints out which content
 is still missing sections.
 
-`make_booklet.py` creates `booklet.md` with the content in a format suitable
-for the booklet accompanying the card deck.
+`make_booklet.py` creates `booklet.md`/`booklet.html` with the content
+in a format suitable for the booklet accompanying the card deck.

@@ -7,6 +7,8 @@ from __future__ import unicode_literals, absolute_import
 from collections import OrderedDict 
 from contextlib import contextmanager
 from functools import reduce
+from markdown import markdown
+from shutil import copyfile
 import json
 import logging
 import operator
@@ -18,6 +20,14 @@ import CommonMark
 
 logging.basicConfig(
     format="%(message)s", stream=sys.stderr, level=logging.INFO)
+
+
+# From https://stackoverflow.com/questions/9662346/python-code-to-remove-html-tags-from-a-string
+def cleanhtml(raw_html):
+    cleanr = re.compile('<.*?>')
+    cleantext = re.sub(cleanr, '', raw_html)
+    return cleantext
+
 
 """
 This module contains a class to change a CommonMark.py AST into a nested
@@ -184,6 +194,61 @@ def get_markdown_ast(markdown_file):
         f.close()
 
 
+# For a given image path, replace it with the new (flattened)
+# destination path.
+def move_image_path(img_path):
+    img_path = img_path.replace("images/", "")
+    img_path = img_path.replace("%20", "_")
+    return "images/" + img_path
+
+# Take a Markdown string, replace all Markdown content with HTML,
+# assign all HTML image tags an additional class attribute
+# and change their path to a different canonical location.
+def demark(data):
+    data = markdown(data)
+    image_tags = re.findall(r'<img.*?>', data)
+    for tag in image_tags:
+        match = re.search(r'src=\".*\"', tag)
+        if match:
+            img_path = match.group()[5:-1]
+            new_img_path = move_image_path(img_path)
+            copyfile("Markdown/" + img_path.replace("%20", " "), "json/" + new_img_path)
+            path_base = os.path.splitext(os.path.basename(new_img_path))[0]
+            new_tag = tag.replace(img_path, new_img_path + '" class="' + path_base)
+            data = data.replace(tag, new_tag)
+        else:
+            raise ValueError("HTML img tag without src.")
+    return data
+
+
+# Take a nested structure, turn all keys to lowercase without spaces
+# and demark all strings.
+def pretty_parse(data):
+    if type(data) is OrderedDict or type(data) is dict:
+        return OrderedDict((k.strip().lower().replace(" ", "_"), pretty_parse(v)) for k,v in data.items())
+    elif type(data) is list:
+        return [pretty_parse(e) for e in data]
+    elif type(data) is str:
+        return demark(data)
+    else:
+        raise TypeError("Unknown field type in generated json dict.")
+
+
+def unhtml_nontext(pretty_parsed):
+    # Remove HTML tags from some non-html data
+    if "title" in pretty_parsed:
+        pretty_parsed["title"] = cleanhtml(pretty_parsed["title"])
+    if "metadata" in pretty_parsed and "type" in pretty_parsed["metadata"]:
+        pretty_parsed["metadata"]["type"] = cleanhtml(pretty_parsed["metadata"]["type"]).lower().replace(" ", "")
+    if "main_version" in pretty_parsed and "correct_answer" in pretty_parsed["main_version"]:
+        pretty_parsed["main_version"]["correct_answer"] = cleanhtml(pretty_parsed["main_version"]["correct_answer"])
+    if "extension_1" in pretty_parsed and "correct_answer" in pretty_parsed["extension_1"]:
+        pretty_parsed["extension_1"]["correct_answer"] = cleanhtml(pretty_parsed["extension_1"]["correct_answer"])
+    if "extension_2" in pretty_parsed and "correct_answer" in pretty_parsed["extension_2"]:
+        pretty_parsed["extension_2"]["correct_answer"] = cleanhtml(pretty_parsed["extension_2"]["correct_answer"])
+    return pretty_parsed
+
+
 def jsonify_markdown(markdown_file, outfile, indent):
     nester = CMarkASTNester()
     renderer = Renderer()
@@ -192,7 +257,9 @@ def jsonify_markdown(markdown_file, outfile, indent):
         ast = get_markdown_ast(markdown_file)
         nested = nester.nest(ast)
         rendered = renderer.stringify_dict(nested)
-        json.dump(rendered, f, indent=indent)
+        pretty_parsed = pretty_parse(rendered)
+        unhtmled = unhtml_nontext(pretty_parsed)
+        json.dump(unhtmled, f, indent=indent)
         f.write("\n")
     return 0
 
@@ -211,7 +278,7 @@ def clean_formatting(filename):
         f.write(data)
 
 if __name__ == '__main__':
-    os.makedirs("json", exist_ok=True)
+    os.makedirs("json/images/", exist_ok=True)
     directory = os.fsencode("Markdown")
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
@@ -220,5 +287,6 @@ if __name__ == '__main__':
             print("Processing " + filename)
             fin = "Markdown/" + filename
             clean_formatting(fin)
-            fout = "json/{}.json".format(basename)
+            new_basename = basename.lower().replace(" ", "-")
+            fout = "json/{}.json".format(new_basename)
             jsonify_markdown(fin, fout, indent=2)

@@ -10,13 +10,13 @@ out.write("var cards = [\n")
 for row in reader:
     out.write("    {\n")
     card = row[0]
-    filename = row[1]
+    filename = row[1].lower().replace(" ", "-")
     suit = suits[card[0]]
     rank = card[1:]
 
     with open("json/" + filename + ".json", "r") as read_file:
         data = json.load(read_file)
-        text = data["Main Version"]["Statement"]
+        text = data["main_version"]["statement"]
         text = text.replace("\n", "\\n")
         text = text.replace("\"", "\\\"")
         out.write('''        "rank": "{}",
