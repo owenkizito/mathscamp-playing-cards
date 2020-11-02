@@ -90,7 +90,7 @@ for row in reader:
             for s in sections:
                 current_section = current_section[s.strip().lower().replace(" ", "_")]
         except KeyError:
-            if ftype != "puzzle" and sections[0] != "Extension 2 ":
+            if ftype != "puzzle" and sections[0] != "Extension 2":
                 # It's ok for puzzles not to have a second extension
                 print("Section " + repl + " not found in " + filebase)
             found = False
@@ -98,7 +98,7 @@ for row in reader:
             # References is a list of refs rather than a string
             if type(current_section) == list:
                 current_section = ''.join(current_section)
-            # if sections[0] != "Extension 2 ":
+            # if sections[0] != "Extension 2":
             if len(current_section) == 0:
                 print("Warning: blank answer in Section " + repl + " of " + filebase)
             elif cleanhtml(current_section)[0] == '[':
@@ -134,24 +134,33 @@ for row in reader:
     # If so, strip the target text to replace the template from images,
     # and add these images as attachments instead.
     for node in new_flow["nodes"]:
-        if "actions" not in node:
-            continue
-        for action in node["actions"]:
-            if "text" not in action:
-                continue
-            text = action["text"]
-            for k,v in replacement_dict.items():
-                if text == k:
-                    images = re.findall(r'<img.*?>', v)
-                    for image in images:
-                        image_filename = re.search(r'src=\".*?\"', image).group()[12:-1]
-                        # print(image[4:-1])
-                        action["attachments"].append("@{{fields.image_path & \"{}\"}}".format(image_filename))
-                    v_stripped = re.sub(r'<img.*?>', "", v).strip()  # strip image tags and trailing whitespace
-                    # We also strip Markdown formatting and replace linebreaks with \n,
-                    # because RapidPro doesn't support Markdown and JSON doesn't allow linebreaks.
-                    v_stripped = cleanhtml(v_stripped).replace("\n\n", "\\n").replace("\n", "\\n")
-                    action["text"] = v_stripped
+        if "actions" in node:
+            for action in node["actions"]:
+                if "text" not in action:
+                    continue
+                text = action["text"]
+                for k,v in replacement_dict.items():
+                    if text == k:
+                        images = re.findall(r'<img.*?>', v)
+                        for image in images:
+                            image_filename = re.search(r'src=\".*?\"', image).group()[12:-1]
+                            # print(image[4:-1])
+                            action["attachments"].append("@{{fields.image_path & \"{}\"}}".format(image_filename))
+                        v_stripped = re.sub(r'<img.*?>', "", v).strip()  # strip image tags and trailing whitespace
+                        # We also strip Markdown formatting and replace linebreaks with \n,
+                        # because RapidPro doesn't support Markdown and JSON doesn't allow linebreaks.
+                        v_stripped = cleanhtml(v_stripped).replace("\n\n", "\\n").replace("\n", "\\n")
+                        action["text"] = v_stripped
+        if "router" in node and "cases" in node["router"]:
+            for case in node["router"]["cases"]:
+                if "arguments" not in case:
+                    continue
+                for i,arg in enumerate(case["arguments"]):
+                    for k,v in replacement_dict.items():
+                        if arg == k:
+                            case["arguments"][i] = v
+
+
 
     # Add this flow to the template_container.
     container["flows"].append(new_flow)
