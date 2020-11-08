@@ -205,7 +205,20 @@ def move_image_path(img_path):
 # assign all HTML image tags an additional class attribute
 # and change their path to a different canonical location.
 def demark(data):
+    # Do intermediate substitutions because the markdown conversion
+    # would mess up the formatting of these otherwise
+    data = re.sub(r"\\\[", "XXLaTeXStartXX", data, flags=re.MULTILINE)
+    data = re.sub(r"\\\]", "XXLaTeXEndXX", data, flags=re.MULTILINE)
+    data = re.sub(r"\\<", "XXUnicodeStartXX", data, flags=re.MULTILINE)
+    data = re.sub(r"\\>", "XXUnicodeEndXX", data, flags=re.MULTILINE)
     data = markdown(data)
+    # Now do the actual replacement: For formulas that are provided in both
+    # LaTeX and Unicode, LaTeX is surrounded by these start/end comments,
+    # and Unicode is commented out.
+    data = re.sub("XXLaTeXStartXX", "<!-- LaTeX Start -->", data, flags=re.MULTILINE)
+    data = re.sub("XXLaTeXEndXX", "<!-- LaTeX End -->", data, flags=re.MULTILINE)
+    data = re.sub("XXUnicodeStartXX", "<!--", data, flags=re.MULTILINE)
+    data = re.sub("XXUnicodeEndXX", "-->", data, flags=re.MULTILINE)
     image_tags = re.findall(r'<img.*?>', data)
     for tag in image_tags:
         match = re.search(r'src=\".*\"', tag)
