@@ -4,6 +4,7 @@ import uuid
 import re
 
 
+
 # From https://stackoverflow.com/questions/9662346/python-code-to-remove-html-tags-from-a-string
 def cleanhtml(raw_html):
     cleanr = re.compile('<.*?>')
@@ -49,11 +50,26 @@ f_replacements.close()
 container_file = open("template_container.json", "r")
 container = json.load(container_file)
 
+flow_info_file = open("flows_info.json", "r")
+flow_info = json.load(flow_info_file)
+flow_info = []
+
 cardcsv = open('cards.csv')
 reader = csv.reader(cardcsv)
 for row in reader:
     card = row[0]
     filebase = row[1].lower().replace(" ", "-")
+
+    # Get flow info (if existing)
+    corresp_flow_info = list(filter(lambda fl: fl["doc name"] == row[1], flow_info ))
+    if len(corresp_flow_info)== 1:
+        have_flow_info = True
+        corresp_flow_info = corresp_flow_info[0]
+    elif len(corresp_flow_info) == 0:
+        have_flow_info = False
+    else:
+        print("error: multiple info for flow " + row[1])
+        break
 
     # Get content specific json file to read from
     filename = "json/" + filebase + ".json"
@@ -78,6 +94,20 @@ for row in reader:
     for k,v in uuid_collector.uuids.items():
         flow_template = flow_template.replace(k, v)
 
+    # After all the text replacements, we read flow_template as JSON.
+    new_flow = json.loads(flow_template)
+    # if the flow is in the flow info list, replace the flow uuid with the corresponding one,
+    # if it is not, add new object to the flow info list with infos about this flow
+    if have_flow_info:
+        new_flow.update(uuid = corresp_flow_info["uuid"])
+    else:
+        corresp_flow_info = {}
+        corresp_flow_info["flow name"] = new_flow["name"]
+        corresp_flow_info["doc name"] = row[1]
+        corresp_flow_info["uuid"] = new_flow["uuid"]
+        corresp_flow_info["card number"] = card
+        flow_info.append(corresp_flow_info)
+
     # Collect text snippets to replace in the flow
     replacement_dict = dict()
     for repl in replacements[ftype]["texts"]:
@@ -101,14 +131,15 @@ for row in reader:
             # if sections[0] != "Extension 2":
             if len(current_section) == 0:
                 print("Warning: blank answer in Section " + repl + " of " + filebase)
+                current_section = " "
             elif cleanhtml(current_section)[0] == '[':
                 print("Warning: template answer in Section " + repl + " of " + filebase)
             # Put content of section into the replacement dict.
             replacement_dict[repl] = current_section
 
-    # After all the text replacements, we read flow_template as JSON.
+    
     # Check for NRICH references and remove starting node if there aren't any.
-    new_flow = json.loads(flow_template)
+    
     if ftype == "puzzle":
         # For puzzles: We determine whether the puzzle is an NRICH puzzle.
         references = ''.join(data["additional_information"]["references"])
@@ -140,16 +171,21 @@ for row in reader:
                     continue
                 text = action["text"]
                 for k,v in replacement_dict.items():
+
                     if text == k:
+                        paragraphs = v.split("</p>\n<p>")
+                        paragraphs[0] = paragraphs[0].replace("<p>","")
+                        paragraphs[-1] = paragraphs[-1].replace("</p>","")
+                        
                         images = re.findall(r'<img.*?>', v)
                         for image in images:
                             image_filename = re.search(r'src=\".*?\"', image).group()[12:-1]
                             # print(image[4:-1])
-                            action["attachments"].append("@{{fields.image_path & \"{}\"}}".format(image_filename))
+                            action["attachments"].append("@(fields.image_path & \"{}\")".format(image_filename))
                         v_stripped = re.sub(r'<img.*?>', "", v).strip()  # strip image tags and trailing whitespace
                         # We also strip Markdown formatting and replace linebreaks with \n,
                         # because RapidPro doesn't support Markdown and JSON doesn't allow linebreaks.
-                        v_stripped = cleanhtml(v_stripped).replace("\n\n", "\\n").replace("\n", "\\n")
+                        v_stripped = cleanhtml(v_stripped).replace("\n\n", "\n")
                         action["text"] = v_stripped
         if "router" in node and "cases" in node["router"]:
             for case in node["router"]["cases"]:
@@ -165,7 +201,26 @@ for row in reader:
     # Add this flow to the template_container.
     container["flows"].append(new_flow)
 
+    #create trigger for flow
+    new_trigger = {
+      "trigger_type": "K",
+      "keyword": "VMC" + corresp_flow_info["card number"],
+      "flow": {
+        "uuid": corresp_flow_info["uuid"],
+        "name": corresp_flow_info["flow name"]
+      },
+      "groups": [],
+      "channel": None
+    }
+    # add trigger word
+    container["triggers"].append(new_trigger)
+
+
 # Save filled up template container as JSON file
-generated_flows = open("generated_flows.json", "w")
+generated_flows = open("./output/new_newgenerated_flows.json", "w")
 json.dump(container, generated_flows, indent=2)   # ensure_ascii=False
 generated_flows.close()
+
+# Update flow info file if flows were added
+with open('./flows_info_new.json', 'w') as outfile:
+    json.dump(flow_info, outfile,indent=2)
