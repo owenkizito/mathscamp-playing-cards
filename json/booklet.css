@@ -1,0 +1,184 @@
+p {
+    display: block;
+    /*display: inline-block;*/
+    /*margin-left: 0px;*/
+    /*margin-right:16px;*/
+    line-height: 135%;
+    margin-bottom: -9px; /* between paragraphs */
+}
+
+body{
+    width:800px /* or you can also set 900px*/
+}
+
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/*b {
+    margin-top: 100px;
+    padding-top: 20px;
+}
+*/
+.Avoid_the_River_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Benford_s_Law_image_0 {
+    width: 480px;
+    height: auto;
+}
+.Benford_s_Law_image_1 {
+    width: 480px;
+    height: auto;
+}
+.Benford_s_Law_image_2 {
+    width: 480px;
+    height: auto;
+}
+.Card_Sums_image_0 {
+    width: 360px;
+    height: auto;
+}
+.Colouring_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Colouring_image_1 {
+    width: 240px;
+    height: auto;
+}
+.Colouring_image_2 {
+    width: 400px;
+    height: auto;
+}
+.Counting_Squares_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Counting_Squares_image_1 {
+    width: 240px;
+    height: auto;
+}
+.Counting_Squares_image_2 {
+    width: 400px;
+    height: auto;
+}
+.Fifteen_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Four_Colours_image_0 {
+    width: 400px;
+    height: auto;
+}
+.Four_Colours_image_1 {
+    width: 400px;
+    height: auto;
+}
+.Four_Colours_image_2 {
+    width: 240px;
+    height: auto;
+}
+.Four_Colours_image_3 {
+    width: 240px;
+    height: auto;
+}
+.Going_to_School_image_0 {
+    width: 240px;
+    height: auto;
+}
+.House_image_0 {
+    width: 240px;
+    height: auto;
+}
+.House_image_1 {
+    width: 240px;
+    height: auto;
+}
+.House_image_2 {
+    width: 240px;
+    height: auto;
+}
+.Newspaper_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Pieces_of_Cake_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Pong_Hau_K_i_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Pong_Hau_K_i_image_1 {
+    width: 240px;
+    height: auto;
+}
+.Pong_Hau_K_i_image_2 {
+    width: 240px;
+    height: auto;
+}
+.Square_Numbers_and_Triangular_Numbers_image_0 {
+    width: 400px;
+    height: auto;
+}
+.Square_Numbers_and_Triangular_Numbers_image_1 {
+    width: 240px;
+    height: auto;
+}
+.Square_Numbers_and_Triangular_Numbers_image_2 {
+    width: 240px;
+    height: auto;
+}
+.Table_Handshakes_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Table_Handshakes_image_1 {
+    width: 240px;
+    height: auto;
+}
+.Table_Handshakes_image_2 {
+    width: 240px;
+    height: auto;
+}
+.Table_Handshakes_image_3 {
+    width: 240px;
+    height: auto;
+}
+.Table_Handshakes_image_4 {
+    width: 240px;
+    height: auto;
+}
+.Triangular_Slices_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Triangular_Slices_image_1 {
+    width: 240px;
+    height: auto;
+}
+.Triangular_Slices_image_2 {
+    width: 480px;
+    height: auto;
+}
+.Triangular_Slices_image_3 {
+    width: 640px;
+    height: auto;
+}
+.Two_Distances_image_0 {
+    width: 240px;
+    height: auto;
+}
+.Two_Distances_image_1 {
+    width: 400px;
+    height: auto;
+}
+.Two_Distances_image_2 {
+    width: 240px;
+    height: auto;
+}

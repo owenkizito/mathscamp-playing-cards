@@ -8,7 +8,8 @@ and various python3 scripts.
 
 1. Ensure you have python >= 3.6 installed.
 
-2. Install the CommonMark python library: https://pypi.org/project/commonmark/
+2. Install markdown for python: See https://python-markdown.github.io/install/
+or https://pypi.org/project/Markdown/ 
 
 3. Open the Google Docs "Content/Export test" in the Virtual maths camp Google
 Drive folder. In the menu, select Tools -> Script Editor. The code editor
@@ -44,20 +45,24 @@ content unless the corresponding GDoc file has been modified in the meantime.
 Download the Markdown folder produced by the previous step, and place it in
 your local copy of this repository. Run `md_to_json.py`.
 This will create a `json/` folder containing each piece of content from
-the Markdown folder converted to JSON.
+the Markdown folder converted to JSON, with extracted images.
 
 ### Various output formats.
 
-Fill in `cards.csv` with the up-to-date mapping of cards to content.
+If the version on this repo isn't up to date,
+fill in `cards.csv` with the up-to-date mapping of cards to content.
 (This is in the spreadsheet "Content/Content Tracker" on Google Drive.)
-
-`make_cards.py` creates a `cards.js` file for use with the card template from
-https://github.com/IDEMSInternational/vmc-cards. However, it currently
-contains HTML which is not supported by the template.
 
 `make_flows.py` creates `generated_flows.json` with RapidPro flows
 for the chatbot. Still needs testing. It also prints out which content
 is still missing sections.
 
-`make_booklet.py` creates `booklet.md`/`booklet.html` with the content
+`make_booklet.py` creates `booklet.html` with the content
 in a format suitable for the booklet accompanying the card deck.
+Copy it into the `json/` folder where its `css` is located and its
+images are dumped after running `md_to_json.py`.
+
+`rescale.sh` takes the images in `json/images`, makes a copy of these
+and rescales them (manually specified) and optimizes their file size.
+Needs `convert` (https://legacy.imagemagick.org/) and `optipng`
+(http://optipng.sourceforge.net/).

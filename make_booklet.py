@@ -3,15 +3,20 @@ import json
 import markdown
 import re
 
+def write_paragraph(title, content, out):
+    insert_pos = content.find("<p>") + len("<p>")
+    if insert_pos == -1:
+        out.write("<b>" + title + ": </b> " + content + "\n\n")
+    else:
+        out.write(content[:insert_pos] + "<b>" + title + ": </b> " + content[insert_pos:] + "\n\n")
+
 suits = {'H' : "hearts", "S" : "spades", "C" : "clubs", "D" : "diamonds"}
 
-out = open("booklet.md", "w")
-# out.write("# Puzzles\n\n")
-
+out = open("booklet.html", "w")
 cardcsv = open('cards.csv')
 reader = csv.reader(cardcsv)
 for row in reader:
-    # out.write("    {\n")
+    out.write("""<link href="booklet.css" rel="stylesheet" type="text/css">\n\n""")
     card = row[0]
     filename = row[1].lower().replace(" ", "-")
     suit = suits[card[0]]
@@ -24,32 +29,29 @@ for row in reader:
         if ctype == "counting":
             ctype = "puzzle"
 
-        out.write("## " + card + " - " + data["title"] + "\n\n")
+        out.write("<h2> " + card + " - " + data["title"] + "</h2>\n\n")
         out.write(data["main_version"]["statement"] + "\n\n")
         if ctype == "puzzle" or ctype == "funfact":
             if "hint" in data["main_version"]:
-                out.write("**Hint**: " + data["main_version"]["hint"] + "\n\n")
-            out.write("**Explanation**: " + data["main_version"]["explanation"] + "\n\n")
+                write_paragraph("Hint", data["main_version"]["hint"], out)
+            write_paragraph("Explanation", data["main_version"]["explanation"], out)
         elif ctype == "game":
-            out.write("**Further instructions**: " + data["main_version"]["further_instructions"] + "\n\n")
-            out.write("**Strategy Tips**: " + data["main_version"]["strategy_tips"] + "\n\n")
-        out.write("### Extension 1\n\n")
+            write_paragraph("Further instructions", data["main_version"]["further_instructions"], out)
+            write_paragraph("Strategy Tips", data["main_version"]["strategy_tips"], out)
+        write_paragraph("About", data["additional_information"]["about"], out)
+        out.write("<h3>Extension 1</h3>\n\n")
         out.write(data["extension_1"]["statement"] + "\n\n")
         if ctype == "puzzle" or ctype == "funfact":
             if "hint" in data["extension_1"]:
-                out.write("**Hint**: " + data["extension_1"]["hint"] + "\n\n")
+                write_paragraph("Hint", data["extension_1"]["hint"], out)
             if "explanation" in data["extension_1"]:
-                out.write("**Explanation**: " + data["extension_1"]["explanation"] + "\n\n")
+                write_paragraph("Explanation", data["extension_1"]["explanation"], out)
         if "extension_2" in data and "statement" in data["extension_2"]:
-            out.write("### Extension 2\n\n")
+            out.write("<h3>Extension 2</h3>\n\n")
             out.write(data["extension_2"]["statement"] + "\n\n")
             if ctype == "puzzle" or ctype == "funfact":
-                out.write("**Hint**: " + data["extension_2"]["hint"] + "\n\n")
-                out.write("**Explanation**: " + data["extension_2"]["explanation"] + "\n\n")
+                write_paragraph("Hint", data["extension_1"]["hint"], out)
+                write_paragraph("Explanation", data["extension_2"]["explanation"], out)
 
 cardcsv.close()
 out.close()
-with open("booklet.md", "r") as bmd:
-    outdata = markdown.markdown(bmd.read())
-    with open("booklet.html", "w") as bhtml:
-        bhtml.write(outdata)
