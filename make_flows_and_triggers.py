@@ -20,28 +20,26 @@ class UuidCollector:
         if type(data) is not dict:
             return
         for k,v in data.items():
-            if k == "type" and v == "enter_flow":
+            #if k == "type" and v == "enter_flow":
                 # We don't want replace uuids of other flows, so don't recurse
-                break
+            #    break
             if type(v) is dict:
-                self.collect_uuids(v)
+                    self.collect_uuids(v)
             elif type(v) is list:
                 for entry in v:
-                    self.collect_uuids(entry)
+                    if (type(entry) is dict and "type" in entry and entry["type"] == "enter_flow"):
+                        self.uuids[entry["uuid"]] = str(uuid.uuid4()) 
+                        break
+                    else:
+                        self.collect_uuids(entry)
             elif k.find('uuid') != -1:
                 # We found a field whose name contains "uuid"
                 # We record this uuid and assign a replacement uuid
                 if v is not None:
                     self.uuids[v] = str(uuid.uuid4()) # Generate new random UUID to replace it with
+        
 
 
-uuid_collector = UuidCollector()
-ftypes = ["puzzle", "funfact", "game"]
-for ftype in ftypes:
-    template = "template_" + ftype + ".json"
-    with open(template, "r") as read_file:
-        data = json.load(read_file)
-        uuid_collector.collect_uuids(data)
 
 f_replacements = open("replacements.json", "r")
 replacements = json.load(f_replacements)
@@ -50,7 +48,7 @@ f_replacements.close()
 container_file = open("template_container.json", "r")
 container = json.load(container_file)
 
-flow_info_file = open("flows_info.json", "r")
+flow_info_file = open("flows_info_new.json", "r")
 flow_info = json.load(flow_info_file)
 flow_info = []
 
@@ -58,6 +56,7 @@ cardcsv = open('cards.csv')
 reader = csv.reader(cardcsv)
 for row in reader:
     card = row[0]
+    
     filebase = row[1].lower().replace(" ", "-")
 
     # Get flow info (if existing)
@@ -91,6 +90,12 @@ for row in reader:
     flow_template = open(flow_fname, "r").read()
     # Replace title and all UUIDs
     flow_template = flow_template.replace(replacements[ftype]["name"], "Content-" + ftype_raw.title() + "-" + filebase)
+    
+    uuid_collector = UuidCollector()
+    with open(flow_fname, "r") as read_file:
+        template_data = json.load(read_file)
+        uuid_collector.collect_uuids(template_data)
+    
     for k,v in uuid_collector.uuids.items():
         flow_template = flow_template.replace(k, v)
 
@@ -101,6 +106,7 @@ for row in reader:
     if have_flow_info:
         new_flow.update(uuid = corresp_flow_info["uuid"])
     else:
+        #new_flow.update(uuid = str(uuid.uuid4()))
         corresp_flow_info = {}
         corresp_flow_info["flow name"] = new_flow["name"]
         corresp_flow_info["doc name"] = row[1]
@@ -131,7 +137,7 @@ for row in reader:
             # if sections[0] != "Extension 2":
             if len(current_section) == 0:
                 print("Warning: blank answer in Section " + repl + " of " + filebase)
-                current_section = " "
+                current_section = "missing"
             elif cleanhtml(current_section)[0] == '[':
                 print("Warning: template answer in Section " + repl + " of " + filebase)
             # Put content of section into the replacement dict.
@@ -166,27 +172,49 @@ for row in reader:
     # and add these images as attachments instead.
     for node in new_flow["nodes"]:
         if "actions" in node:
-            for action in node["actions"]:
-                if "text" not in action:
-                    continue
-                text = action["text"]
-                for k,v in replacement_dict.items():
+            if (len(node["actions"])>0 and node["actions"][0]["type"] == "send_msg"):
+                action = node["actions"][0]
+                template_text = action["text"]
+                quick_replies = action["quick_replies"].copy()
 
-                    if text == k:
-                        paragraphs = v.split("</p>\n<p>")
+                for k,text in replacement_dict.items():
+                    if template_text == k:
+                        
+                        paragraphs = text.split("</p>\n<p>")
                         paragraphs[0] = paragraphs[0].replace("<p>","")
                         paragraphs[-1] = paragraphs[-1].replace("</p>","")
+                        if len(paragraphs) == 0:
+                            print("error no paragraphs")
+
+                        node["actions"] = [];            
+                        for par in paragraphs:
+                            
+
+                            images = re.findall(r'<img.*?>', par)
+                            attachment_list = []
+                            for image in images:
+                                image_filename = re.search(r'src=\".*?\"', image).group()[12:-1]
+                                attachment_list.append("image:@(fields.image_path & \"{}\")".format(image_filename))
+                            
+                            if len(images)>0:
+                                text_stripped = " "
+                            else:
+                                # strip image tags and trailing whitespace
+                                # We also strip Markdown formatting and replace linebreaks with \n,
+                                # because RapidPro doesn't support Markdown and JSON doesn't allow linebreaks.
+                                text_stripped = cleanhtml(par).strip().replace("\n\n", "\n")
                         
-                        images = re.findall(r'<img.*?>', v)
-                        for image in images:
-                            image_filename = re.search(r'src=\".*?\"', image).group()[12:-1]
-                            # print(image[4:-1])
-                            action["attachments"].append("@(fields.image_path & \"{}\")".format(image_filename))
-                        v_stripped = re.sub(r'<img.*?>', "", v).strip()  # strip image tags and trailing whitespace
-                        # We also strip Markdown formatting and replace linebreaks with \n,
-                        # because RapidPro doesn't support Markdown and JSON doesn't allow linebreaks.
-                        v_stripped = cleanhtml(v_stripped).replace("\n\n", "\n")
-                        action["text"] = v_stripped
+
+                            node["actions"].append({
+                                "attachments": attachment_list.copy(),
+                                "text": text_stripped,
+                                "type": "send_msg",
+                                "quick_replies": [],
+                                "uuid": str(uuid.uuid4())
+                            })
+                node["actions"][-1]["quick_replies"] = quick_replies.copy()
+
+                        
         if "router" in node and "cases" in node["router"]:
             for case in node["router"]["cases"]:
                 if "arguments" not in case:
@@ -204,7 +232,7 @@ for row in reader:
     #create trigger for flow
     new_trigger = {
       "trigger_type": "K",
-      "keyword": "VMC" + corresp_flow_info["card number"],
+      "keyword": "VMC_" + corresp_flow_info["card number"],
       "flow": {
         "uuid": corresp_flow_info["uuid"],
         "name": corresp_flow_info["flow name"]
@@ -212,15 +240,28 @@ for row in reader:
       "groups": [],
       "channel": None
     }
-    # add trigger word
+
+    new_trigger_with_typo = {
+      "trigger_type": "K",
+      "keyword": "VMC-" + corresp_flow_info["card number"],
+      "flow": {
+        "uuid": corresp_flow_info["uuid"],
+        "name": corresp_flow_info["flow name"]
+      },
+      "groups": [],
+      "channel": None
+    }
+    # add trigger words
     container["triggers"].append(new_trigger)
+    container["triggers"].append(new_trigger_with_typo)
+
 
 
 # Save filled up template container as JSON file
-generated_flows = open("./output/new_newgenerated_flows.json", "w")
+generated_flows = open("./output/new_generated_flows_diamonds_newid.json", "w")
 json.dump(container, generated_flows, indent=2)   # ensure_ascii=False
 generated_flows.close()
 
 # Update flow info file if flows were added
-with open('./flows_info_new.json', 'w') as outfile:
+with open('./flows_info_no_rep.json', 'w') as outfile:
     json.dump(flow_info, outfile,indent=2)
