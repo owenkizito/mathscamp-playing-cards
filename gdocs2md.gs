@@ -831,7 +831,7 @@ function processParagraph(index, element, inSrc, imageCounter, listCounters, ima
     return result;
   }
   
-  if (element.getType() !== DocumentApp.ElementType.PARAGRAPH) {
+  if ((element.getType() !== DocumentApp.ElementType.PARAGRAPH) && (element.getType() !== DocumentApp.ElementType.LIST_ITEM)) {
     return result;
   }
   
