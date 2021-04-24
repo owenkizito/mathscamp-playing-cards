@@ -1,0 +1,88 @@
+# Title
+
+Dealing Cards
+
+# Metadata
+
+## Type
+
+puzzle
+
+# Main Version
+
+## Statement
+
+Children are sitting in a circle, and a teacher walks around the circle, dealing cards. The teacher gives a Jack to every second child, and a Queen to every third child.
+
+After going around four times, the sixth child in the circle from where the teacher started has two Jacks and two Queens.
+
+What is the smallest possible number of children in the circle?
+
+## Correct Answer
+
+7
+
+## Hint
+
+Must there be an even or an odd number of children in the circle?
+
+## Explanation
+
+The teacher goes round the circle four times. If there was an even number of children, the sixth child would always receive a Jack each time and would have four Jacks by the end. Since they only have two Jacks, there must be an odd number of children in the circle.
+
+The sixth child receives a Queen in the first round because 6 is a multiple of 3. She only receives one more Queen so the answer can't be a multiple of 3.
+
+The options are 7, 11, 13, 17, 19 … and so 7 is the fewest number of children. 
+
+# Extension 1
+
+## Statement
+
+Children are sitting in a circle, and a teacher walks around the circle, dealing cards. The teacher gives a Jack to every second child, a Queen to every third child and a King to every fifth child. 
+
+After going around four times, the sixth child from where the teacher started has four Jacks, two Queens and no Kings.
+
+What is the fewest amount of children could there be?
+
+## Hint
+
+Think about whether the number needs to be odd or even and if it needs to be divisible by 3 or 5.
+
+## Correct Answer
+
+10
+
+## Explanation
+
+The child receives four Jacks so there must be an even number of children, but only receives two queens so the number of children cannot be a multiple of 3. As the child receives no Kings, 6 and 10 would both be options (try these out with cards or with pen and paper to check). But 6 is a multiple of 3 so the answer must be 10. 
+
+# Extension 2 
+
+## Statement
+
+1000 students are sitting in a circle, and a teacher walks around the circle, dealing cards. The teacher gives a Jack to every second child, and a Queen to every third child
+
+After the teacher goes around 1000 times, how many cards in total will the sixth child have?
+
+## Hint
+
+Which child will get a Queen next after the 999ᵗʰ child gets one on the first turn round?
+
+## Correct Answer
+
+1334
+
+## Explanation
+
+There are an even number of children so the sixth child will always be in a position on each turn to receive a Jack. So she will have 1000 cards from that rule. For the Queens in the first round the students to receive one will be in position 3, 6, 9, 12, 15, ..., 999, then it will be 2, 5, 8, ..., 998 and then 1,4,7, ..., 997, 1000, and back to 3, 6, 9, ..., 999.  So every third time she will get a Queen. Because 1000 ∕ 3 is 333 with a remainder of 1, she will get one on the 1000ᵗʰ turn too. So 1000 + 334 = 1334 is the total number of cards.  
+
+# Additional information
+
+## About
+
+This puzzle was written by a student at the Lycee Francais Charles de Gaulle for a Christmas puzzle involving handing out red and blue presents.
+
+## References
+
+* https://lycee.samicharity.co.uk/2018/12/03/wrapping-presents/
+
