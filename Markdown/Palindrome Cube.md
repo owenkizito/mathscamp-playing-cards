@@ -34,7 +34,7 @@ The corresponding sequence of palindromic cubes begins:
 
 ## Statement
 
-There are 5 palindromic square numbers between 1 and 100 (inclusive) whose square root is also a palindrome. Can you find them all?
+There are 5 palindromic square numbers between 1 and 1000 (inclusive) whose square root is also a palindrome. Can you find them all?
 
 ## Hint
 
