@@ -18,7 +18,7 @@ How many bees could fly one thousand miles if they had ten gallons of honey?
 
 ## Correct Answer
 
-70,000 
+70000 
 
 ## Hint
 
