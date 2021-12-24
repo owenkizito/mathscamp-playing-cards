@@ -1,4 +1,5 @@
 json/*.json
+crowdin/*.json
 cards.js
 generated_flows.json
 booklet.md
