@@ -11,7 +11,7 @@ def process_entry(content, out):
         if type(c) == NavigableString:
             string = str(c)
         else:
-            string = ''.join(str(t) for t in c.contents)
+            string = ''.join(str(t) for t in c.contents if t.name != 'img')
         string = string.strip()
         if string:
             out[string] = string
