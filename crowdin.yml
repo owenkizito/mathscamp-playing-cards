@@ -1,0 +1,3 @@
+files:
+  - source: crowdin/cards/en/*.json
+    translation: crowdin/cards/%two_letters_code%/%original_file_name%
