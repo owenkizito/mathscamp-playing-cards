@@ -1,5 +1,5 @@
 {
-  "Triangular Slices": "Triangular Slices",
+  "Triangular Slices": "Fette Triangolari",
   "Consider the cake below – a six-sided hexagon. Now split it into triangles by cutting along diagonals that don't cross each other, one example is given in red. This splitting into triangles is called a triangulation, in how many ways can you do this?": "Consider the cake below – a six-sided hexagon. Now split it into triangles by cutting along diagonals that don't cross each other, one example is given in red. This splitting into triangles is called a triangulation, in how many ways can you do this?",
   "In how many ways could you do it if the cake were a square? What if it were a five-sided pentagon? Can you use the symmetries of your cake to count faster?": "In how many ways could you do it if the cake were a square? What if it were a five-sided pentagon? Can you use the symmetries of your cake to count faster?",
   "It is best to start with a simpler question and look for patterns. Start by looking at a square. There are two different ways we could slice the cake.": "It is best to start with a simpler question and look for patterns. Start by looking at a square. There are two different ways we could slice the cake.",
