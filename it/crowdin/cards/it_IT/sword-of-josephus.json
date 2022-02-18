@@ -13,8 +13,8 @@
   "8 - 1": "8 - 1",
   "9 - 3": "9 - 3",
   "And so on. Each power of two (1, 2, 4, 8, …) \"resets\" the last peg standing to be number 1. You can see that the number of the last peg standing goes up in odd numbers after this. To work out the answer for 52, we know the last reset was the largest power of two. The largest power of two below 52 is 32, and 52 - 32 = 20. So it is the twentieth odd number that is calculated as 2×20 + 1 = 41.": "And so on. Each power of two (1, 2, 4, 8, …) \"resets\" the last peg standing to be number 1. You can see that the number of the last peg standing goes up in odd numbers after this. To work out the answer for 52, we know the last reset was the largest power of two. The largest power of two below 52 is 32, and 52 - 32 = 20. So it is the twentieth odd number that is calculated as 2×20 + 1 = 41.",
-  "The legend of this puzzle is about a group of soldiers in a circle.": "The legend of this puzzle is about a group of soldiers in a circle.",
-  "Pegs numbered 1 to 2000 are placed in a circle. Starting with number 2, alternate pegs are knocked down until only one is left.": "Pegs numbered 1 to 2000 are placed in a circle. Starting with number 2, alternate pegs are knocked down until only one is left.",
+  "The legend of this puzzle is about a group of soldiers in a circle.": "La leggenda di questo rompicapo è su un gruppo di soldati in un cerchio.",
+  "Pegs numbered 1 to 2000 are placed in a circle. Starting with number 2, alternate pegs are knocked down until only one is left.": "Dei pioli numerati da 1 a 2000 sono posizionati in un cerchio. A partire dal numero 2, sono abbattuti dei pioli alternati finché ne rimane uno.",
   "What is the biggest power of 2 (1, 2, 4, 8, ...) that is less than 2000?": "Qual è la più grande potenza di 2 (1, 2, 4, 8, ...) inferiore a 2000?",
   "The biggest power of 2 below 2000 is 1024. As 2000 - 1024 = 976, the final peg will be the 976ᵗʰ odd number, 976×2 + 1 = 1953.": "La più grande potenza di 2 inferiore a 2000 è 1024. Poiché 2000 - 1024 = 976, l'ultimo piolo sarà il 976esimo numero dispari, 976x2 + 1 = 1953."
 }
