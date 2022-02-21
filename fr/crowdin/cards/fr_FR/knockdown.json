@@ -4,7 +4,7 @@
   "They are then knocked over, one at a time, following these two rules:": "They are then knocked over, one at a time, following these two rules:",
   "(1.) Starting with the first standing peg on the left, alternate pegs are knocked down, until the end of the row is reached.": "(1.) Starting with the first standing peg on the left, alternate pegs are knocked down, until the end of the row is reached.",
   "(2.) Each time the end of the row is reached, repeat the previous rule.": "(2.) Each time the end of the row is reached, repeat the previous rule.",
-  "What is the number of the last peg to be knocked down?": "What is the number of the last peg to be knocked down?",
+  "What is the number of the last peg to be knocked down?": "Quel sera le chiffre du dernier poteau poteaux = mauvais mot = pegs à être renversé?",
   "What happens if you only had 5 pegs? What about 10 or 20? Can you spot the pattern?": "What happens if you only had 5 pegs? What about 10 or 20? Can you spot the pattern?",
   "Start: 1 2 3 4 5 6 7 8 9 ...": "Start: 1 2 3 4 5 6 7 8 9 ...",
   "First round:  ✕ 2 ✕ 4 ✕ 6 ✕ 8 ✕  ... only even numbers left": "First round:  ✕ 2 ✕ 4 ✕ 6 ✕ 8 ✕  ... only even numbers left",
